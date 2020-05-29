@@ -1,0 +1,304 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+  <!-- EF Runtime content -->
+  <edmx:Runtime>
+    <!-- SSDL content -->
+    <edmx:StorageModels>
+    <Schema Namespace="IMDBModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="ActorsAndProducers">
+          <Key>
+            <PropertyRef Name="ActorOrProducerId" />
+          </Key>
+          <Property Name="ActorOrProducerId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="50" />
+          <Property Name="Sex" Type="int" />
+          <Property Name="IsActor" Type="bit" />
+          <Property Name="DOB" Type="date" />
+          <Property Name="BIO" Type="nvarchar(max)" />
+        </EntityType>
+        <EntityType Name="CastInMovie">
+          <Key>
+            <PropertyRef Name="CMID" />
+          </Key>
+          <Property Name="CMID" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="MovieId" Type="int" />
+          <Property Name="ActorId" Type="int" />
+        </EntityType>
+        <EntityType Name="Gender">
+          <Key>
+            <PropertyRef Name="GenderId" />
+          </Key>
+          <Property Name="GenderId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="10" />
+        </EntityType>
+        <EntityType Name="Movies">
+          <Key>
+            <PropertyRef Name="MovieId" />
+          </Key>
+          <Property Name="MovieId" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="Name" Type="nvarchar" MaxLength="50" />
+          <Property Name="YearOfRelease" Type="int" />
+          <Property Name="ProducerId" Type="int" />
+          <Property Name="Poster" Type="nvarchar(max)" />
+          <Property Name="Plot" Type="nvarchar(max)" />
+        </EntityType>
+        <Association Name="FK__ActorsAndPr__Sex__1273C1CD">
+          <End Role="Gender" Type="Self.Gender" Multiplicity="0..1" />
+          <End Role="ActorsAndProducers" Type="Self.ActorsAndProducers" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Gender">
+              <PropertyRef Name="GenderId" />
+            </Principal>
+            <Dependent Role="ActorsAndProducers">
+              <PropertyRef Name="Sex" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__CastInMov__Actor__1920BF5C">
+          <End Role="ActorsAndProducers" Type="Self.ActorsAndProducers" Multiplicity="0..1" />
+          <End Role="CastInMovie" Type="Self.CastInMovie" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ActorsAndProducers">
+              <PropertyRef Name="ActorOrProducerId" />
+            </Principal>
+            <Dependent Role="CastInMovie">
+              <PropertyRef Name="ActorId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__CastInMov__Movie__182C9B23">
+          <End Role="Movies" Type="Self.Movies" Multiplicity="0..1" />
+          <End Role="CastInMovie" Type="Self.CastInMovie" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Movies">
+              <PropertyRef Name="MovieId" />
+            </Principal>
+            <Dependent Role="CastInMovie">
+              <PropertyRef Name="MovieId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Movies__Producer__15502E78">
+          <End Role="ActorsAndProducers" Type="Self.ActorsAndProducers" Multiplicity="0..1" />
+          <End Role="Movies" Type="Self.Movies" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ActorsAndProducers">
+              <PropertyRef Name="ActorOrProducerId" />
+            </Principal>
+            <Dependent Role="Movies">
+              <PropertyRef Name="ProducerId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <EntityContainer Name="IMDBModelStoreContainer">
+          <EntitySet Name="ActorsAndProducers" EntityType="Self.ActorsAndProducers" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="CastInMovie" EntityType="Self.CastInMovie" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Gender" EntityType="Self.Gender" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="Movies" EntityType="Self.Movies" Schema="dbo" store:Type="Tables" />
+          <AssociationSet Name="FK__ActorsAndPr__Sex__1273C1CD" Association="Self.FK__ActorsAndPr__Sex__1273C1CD">
+            <End Role="Gender" EntitySet="Gender" />
+            <End Role="ActorsAndProducers" EntitySet="ActorsAndProducers" />
+          </AssociationSet>
+          <AssociationSet Name="FK__CastInMov__Actor__1920BF5C" Association="Self.FK__CastInMov__Actor__1920BF5C">
+            <End Role="ActorsAndProducers" EntitySet="ActorsAndProducers" />
+            <End Role="CastInMovie" EntitySet="CastInMovie" />
+          </AssociationSet>
+          <AssociationSet Name="FK__CastInMov__Movie__182C9B23" Association="Self.FK__CastInMov__Movie__182C9B23">
+            <End Role="Movies" EntitySet="Movies" />
+            <End Role="CastInMovie" EntitySet="CastInMovie" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Movies__Producer__15502E78" Association="Self.FK__Movies__Producer__15502E78">
+            <End Role="ActorsAndProducers" EntitySet="ActorsAndProducers" />
+            <End Role="Movies" EntitySet="Movies" />
+          </AssociationSet>
+        </EntityContainer>
+      </Schema></edmx:StorageModels>
+    <!-- CSDL content -->
+    <edmx:ConceptualModels>
+      <Schema Namespace="IMDBModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+        <EntityContainer Name="IMDBEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="ActorsAndProducers" EntityType="IMDBModel.ActorsAndProducer" />
+          <EntitySet Name="CastInMovies" EntityType="IMDBModel.CastInMovie" />
+          <EntitySet Name="Genders" EntityType="IMDBModel.Gender" />
+          <EntitySet Name="Movies" EntityType="IMDBModel.Movy" />
+          <AssociationSet Name="FK__ActorsAndPr__Sex__1273C1CD" Association="IMDBModel.FK__ActorsAndPr__Sex__1273C1CD">
+            <End Role="Gender" EntitySet="Genders" />
+            <End Role="ActorsAndProducer" EntitySet="ActorsAndProducers" />
+          </AssociationSet>
+          <AssociationSet Name="FK__CastInMov__Actor__1920BF5C" Association="IMDBModel.FK__CastInMov__Actor__1920BF5C">
+            <End Role="ActorsAndProducer" EntitySet="ActorsAndProducers" />
+            <End Role="CastInMovie" EntitySet="CastInMovies" />
+          </AssociationSet>
+          <AssociationSet Name="FK__Movies__Producer__15502E78" Association="IMDBModel.FK__Movies__Producer__15502E78">
+            <End Role="ActorsAndProducer" EntitySet="ActorsAndProducers" />
+            <End Role="Movy" EntitySet="Movies" />
+          </AssociationSet>
+          <AssociationSet Name="FK__CastInMov__Movie__182C9B23" Association="IMDBModel.FK__CastInMov__Movie__182C9B23">
+            <End Role="Movy" EntitySet="Movies" />
+            <End Role="CastInMovie" EntitySet="CastInMovies" />
+          </AssociationSet>
+        </EntityContainer>
+        <EntityType Name="ActorsAndProducer">
+          <Key>
+            <PropertyRef Name="ActorOrProducerId" />
+          </Key>
+          <Property Name="ActorOrProducerId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="Sex" Type="Int32" />
+          <Property Name="IsActor" Type="Boolean" />
+          <Property Name="DOB" Type="DateTime" Precision="0" />
+          <Property Name="BIO" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="Gender" Relationship="IMDBModel.FK__ActorsAndPr__Sex__1273C1CD" FromRole="ActorsAndProducer" ToRole="Gender" />
+          <NavigationProperty Name="CastInMovies" Relationship="IMDBModel.FK__CastInMov__Actor__1920BF5C" FromRole="ActorsAndProducer" ToRole="CastInMovie" />
+          <NavigationProperty Name="Movies" Relationship="IMDBModel.FK__Movies__Producer__15502E78" FromRole="ActorsAndProducer" ToRole="Movy" />
+        </EntityType>
+        <EntityType Name="CastInMovie">
+          <Key>
+            <PropertyRef Name="CMID" />
+          </Key>
+          <Property Name="CMID" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="MovieId" Type="Int32" />
+          <Property Name="ActorId" Type="Int32" />
+          <NavigationProperty Name="ActorsAndProducer" Relationship="IMDBModel.FK__CastInMov__Actor__1920BF5C" FromRole="CastInMovie" ToRole="ActorsAndProducer" />
+          <NavigationProperty Name="Movy" Relationship="IMDBModel.FK__CastInMov__Movie__182C9B23" FromRole="CastInMovie" ToRole="Movy" />
+        </EntityType>
+        <EntityType Name="Gender">
+          <Key>
+            <PropertyRef Name="GenderId" />
+          </Key>
+          <Property Name="GenderId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="10" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="ActorsAndProducers" Relationship="IMDBModel.FK__ActorsAndPr__Sex__1273C1CD" FromRole="Gender" ToRole="ActorsAndProducer" />
+        </EntityType>
+        <EntityType Name="Movy">
+          <Key>
+            <PropertyRef Name="MovieId" />
+          </Key>
+          <Property Name="MovieId" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="Name" Type="String" MaxLength="50" FixedLength="false" Unicode="true" />
+          <Property Name="YearOfRelease" Type="Int32" />
+          <Property Name="ProducerId" Type="Int32" />
+          <Property Name="Poster" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="Plot" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <NavigationProperty Name="ActorsAndProducer" Relationship="IMDBModel.FK__Movies__Producer__15502E78" FromRole="Movy" ToRole="ActorsAndProducer" />
+          <NavigationProperty Name="CastInMovies" Relationship="IMDBModel.FK__CastInMov__Movie__182C9B23" FromRole="Movy" ToRole="CastInMovie" />
+        </EntityType>
+        <Association Name="FK__ActorsAndPr__Sex__1273C1CD">
+          <End Type="IMDBModel.Gender" Role="Gender" Multiplicity="0..1" />
+          <End Type="IMDBModel.ActorsAndProducer" Role="ActorsAndProducer" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Gender">
+              <PropertyRef Name="GenderId" />
+            </Principal>
+            <Dependent Role="ActorsAndProducer">
+              <PropertyRef Name="Sex" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__CastInMov__Actor__1920BF5C">
+          <End Type="IMDBModel.ActorsAndProducer" Role="ActorsAndProducer" Multiplicity="0..1" />
+          <End Type="IMDBModel.CastInMovie" Role="CastInMovie" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ActorsAndProducer">
+              <PropertyRef Name="ActorOrProducerId" />
+            </Principal>
+            <Dependent Role="CastInMovie">
+              <PropertyRef Name="ActorId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__Movies__Producer__15502E78">
+          <End Type="IMDBModel.ActorsAndProducer" Role="ActorsAndProducer" Multiplicity="0..1" />
+          <End Type="IMDBModel.Movy" Role="Movy" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="ActorsAndProducer">
+              <PropertyRef Name="ActorOrProducerId" />
+            </Principal>
+            <Dependent Role="Movy">
+              <PropertyRef Name="ProducerId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        <Association Name="FK__CastInMov__Movie__182C9B23">
+          <End Type="IMDBModel.Movy" Role="Movy" Multiplicity="0..1" />
+          <End Type="IMDBModel.CastInMovie" Role="CastInMovie" Multiplicity="*" />
+          <ReferentialConstraint>
+            <Principal Role="Movy">
+              <PropertyRef Name="MovieId" />
+            </Principal>
+            <Dependent Role="CastInMovie">
+              <PropertyRef Name="MovieId" />
+            </Dependent>
+          </ReferentialConstraint>
+        </Association>
+        </Schema>
+    </edmx:ConceptualModels>
+    <!-- C-S mapping content -->
+    <edmx:Mappings>
+      <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
+        <EntityContainerMapping StorageEntityContainer="IMDBModelStoreContainer" CdmEntityContainer="IMDBEntities">
+          <EntitySetMapping Name="ActorsAndProducers">
+            <EntityTypeMapping TypeName="IMDBModel.ActorsAndProducer">
+              <MappingFragment StoreEntitySet="ActorsAndProducers">
+                <ScalarProperty Name="BIO" ColumnName="BIO" />
+                <ScalarProperty Name="DOB" ColumnName="DOB" />
+                <ScalarProperty Name="IsActor" ColumnName="IsActor" />
+                <ScalarProperty Name="Sex" ColumnName="Sex" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="ActorOrProducerId" ColumnName="ActorOrProducerId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="CastInMovies">
+            <EntityTypeMapping TypeName="IMDBModel.CastInMovie">
+              <MappingFragment StoreEntitySet="CastInMovie">
+                <ScalarProperty Name="ActorId" ColumnName="ActorId" />
+                <ScalarProperty Name="MovieId" ColumnName="MovieId" />
+                <ScalarProperty Name="CMID" ColumnName="CMID" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Genders">
+            <EntityTypeMapping TypeName="IMDBModel.Gender">
+              <MappingFragment StoreEntitySet="Gender">
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="GenderId" ColumnName="GenderId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="Movies">
+            <EntityTypeMapping TypeName="IMDBModel.Movy">
+              <MappingFragment StoreEntitySet="Movies">
+                <ScalarProperty Name="Plot" ColumnName="Plot" />
+                <ScalarProperty Name="Poster" ColumnName="Poster" />
+                <ScalarProperty Name="ProducerId" ColumnName="ProducerId" />
+                <ScalarProperty Name="YearOfRelease" ColumnName="YearOfRelease" />
+                <ScalarProperty Name="Name" ColumnName="Name" />
+                <ScalarProperty Name="MovieId" ColumnName="MovieId" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+        </EntityContainerMapping>
+      </Mapping>
+    </edmx:Mappings>
+  </edmx:Runtime>
+  <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <Connection>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="MetadataArtifactProcessing" Value="EmbedInOutputAssembly" />
+      </DesignerInfoPropertySet>
+    </Connection>
+    <Options>
+      <DesignerInfoPropertySet>
+        <DesignerProperty Name="ValidateOnBuild" Value="true" />
+        <DesignerProperty Name="EnablePluralization" Value="true" />
+        <DesignerProperty Name="IncludeForeignKeysInModel" Value="true" />
+        <DesignerProperty Name="UseLegacyProvider" Value="false" />
+        <DesignerProperty Name="CodeGenerationStrategy" Value="None" />
+      </DesignerInfoPropertySet>
+    </Options>
+    <!-- Diagram content (shape and connector positions) -->
+    <Diagrams></Diagrams>
+  </Designer>
+</edmx:Edmx>

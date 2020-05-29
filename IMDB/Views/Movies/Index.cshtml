@@ -1,0 +1,506 @@
+﻿
+@{
+    /**/
+
+    ViewBag.Title = "Movies";
+}
+
+<h2>Movies</h2>
+<input type="hidden" id="hdnUserId" value="-1" />
+<input type="hidden" id="hdnMovieId" value="-1" />
+<input type="hidden" id="hdnPoster" value="" />
+@*<button class="btn btn-success" style="float: right;">Add Movie</button>*@
+<!-- Trigger the modal with a button -->
+<button type="button" class="btn btn-info btn-sm" id="btnAdd">Add Movie</button>
+<br />
+<br />
+<br />
+<div class="table-responsive">
+    <table id="tblStudent" class="table table-bordered table-hover">
+        <thead>
+            <tr>
+                <th>Poster</th>
+                <th>Name</th>
+                <th>Gender</th>
+                <th>Mobile</th>
+                <th>Address</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+</div>
+@Html.Partial("_AddMovie");
+@Html.Partial("_EditUser");
+
+<script type="text/javascript">
+    var frmUserValidations = null;
+    var frmMovieValidations = null;
+    $(document).ready(function () {
+        GetMovies();
+        GetActors();
+        GetProducers();
+
+        $("#btnAdd").click(function () {
+            $("#txtFile").val(null);
+            $("#txtTitle").val("");
+            $("#txtYear").val("");
+            $("#txtPlot").val("");
+            $("#imgPoster").val("");
+            $("#selActors").val(null).trigger('change');
+            $("#selProducer").val(null).trigger('change')
+            $("#btnMovieSave").text("Save Movie");
+            $("#hdnPoster").val("");
+            $("#hdnMovieId").val(-1);
+            $("#imgPoster").attr("src", "");
+            frmMovieValidations.resetForm();
+            $("input,select").removeClass("error");
+            $("#myModal").modal("show");
+        })
+
+         frmUserValidations = $('#frmUser').validate({ // initialize the plugin
+            rules: {
+                txtName: {
+                    required: true,
+
+                },
+                txtBio: {
+                    required: true,
+                },
+                txtDOB: {
+                    required: true,
+                },
+                ddlGender: {
+                    Gender: true,
+                }
+            }, messages: {
+                txtName: {
+                    required: "Required",
+                },
+                txtBio: {
+                    required: "Required",
+                },
+                txtDOB: {
+                    required: "Required",
+                },
+                //ddlGender: {
+                //    Gender: "test",
+                //}
+            }
+        });
+        jQuery.validator.addMethod("Gender", function (value, element) {
+            return value != null && value != "" && value != -1
+        }, "Please Select Gender");
+
+
+        frmMovieValidations = $('#frmMovie').validate({ // initialize the plugin
+            rules: {
+                txtTitle: {
+                    required: true,
+
+                },
+                txtYear: {
+                    required: true,
+                    minlength: 4,
+                    maxlength: 4
+                },
+                txtPlot: {
+                    required: true,
+                },
+                selActors: {
+                    Actors: true,
+                },
+                selProducer: {
+                    Producer: true,
+                }
+            }, messages: {
+                txtTitle: {
+                    required: "Required",
+                },
+                txtYear: {
+                    required: "Required",
+                    minlength: "Should have 4 digits",
+                    maxlength: "Should have 4 digits",
+                },
+                txtPlot: {
+                    required: "Required",
+                },
+
+            }
+        });
+        jQuery.validator.addMethod("Actors", function (value, element) {
+            return (value != null && value.length > 0)
+        }, "Please Select Actor");
+
+        jQuery.validator.addMethod("Producer", function (value, element) {
+            return (value != null && value.length > 0)
+        }, "Please Select Producer");
+
+        $('.modal-dialog').draggable({
+            handle: ".modal-header"
+        });
+
+    })
+
+
+
+    function SaveMovie() {
+
+        if ($("#frmMovie").valid()) {
+            var ActorTags = $("#selActors").select2("data");
+            var Actors = [];
+            $.each($(ActorTags), function (index, data) {
+                var actor = {
+                    Name: data.text,
+                    ActorOrProducerId: (data.id == data.text) ? -1 : data.id,
+                    IsNew: data.newOption
+                }
+                Actors.push(actor);
+            });
+
+            var ProducerTags = $("#selProducer").select2("data")[0];
+            var ProducerName = ProducerTags.text;
+            var ProducerId = ProducerTags.newOption == true ? -1 : ProducerTags.id;
+
+            var Movie = {
+                MovieId: $("#hdnMovieId").val(),
+                Name: $("#txtTitle").val(),
+                YearOfRelease: $("#txtYear").val(),
+                Actors: Actors,
+                ProducerName: ProducerName,
+                ProducerId: ProducerId,
+                Plot: $("#txtPlot").val(),
+                Poster: $("#hdnPoster").val(),
+            }
+
+
+            var data = new FormData();
+            var file = $('#txtFile')[0].files[0];
+            data.append('Poster', file);
+            data.append('Movie', JSON.stringify(Movie));
+
+            $.ajax({
+                type: "POST",
+                url: rooturl + "api/Movie/CreateMovie",
+                contentType: false,
+                processData: false,
+                data: data,
+                success: function (result) {
+                    alert("Movied Saved successfully");
+                    $("#myModal").modal("hide");
+                    GetMovies();
+
+                },
+                error: function (data, textStatus, jqXHR) {
+
+                }
+            });
+        }
+
+    }
+    function GetActors() {
+        $.ajax({
+            type: "GET",
+            url: rooturl + "api/Movie/GetActors",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                var sdata = [];
+                $.each(data, function (key, value) {
+                    sdata.push({ id: value.ActorOrProducerId, text: value.Name })
+                });
+                moduelSelect2 = $("#selActors").select2({
+                    placeholder: "Select Actors",
+                    multiple: true,
+                    data: sdata,
+                    tags: true,
+                    width: "100%",
+                    createTag: function (params) {
+                        return {
+                            id: params.term,
+                            text: params.term,
+                            newOption: true
+                        }
+                    },
+                    templateResult: function (data) {
+                        var $result = $("<span></span>");
+
+                        $result.text(data.text);
+
+                        if (data.newOption) {
+                            $result.append(" <em>(new)</em>");
+                        }
+
+                        return $result;
+                    }
+                });
+
+            },
+            error: function (data, textStatus, jqXHR) {
+                alert(data.status);
+                alert(jqXHR);
+            }
+        });
+
+
+    }
+    function GetProducers() {
+        $.ajax({
+            type: "GET",
+            url: rooturl + "api/Movie/GetProducers",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                var sdata = [];
+                $.each(data, function (key, value) {
+                    sdata.push({ id: value.ActorOrProducerId, text: value.Name })
+                });
+                moduelSelect2 = $("#selProducer").select2({
+                    placeholder: "Select Producers",
+                    multiple: false,
+                    data: sdata,
+                    tags: true,
+                    width: "100%",
+                    createTag: function (params) {
+                        return {
+                            id: params.term,
+                            text: params.term,
+                            newOption: true
+                        }
+                    },
+                    templateResult: function (data) {
+                        var $result = $("<span></span>");
+
+                        $result.text(data.text);
+
+                        if (data.newOption) {
+                            $result.append(" <em>(new)</em>");
+                        }
+
+                        return $result;
+                    }
+                });
+
+            },
+            error: function (data, textStatus, jqXHR) {
+                alert(data.status);
+                alert(jqXHR);
+            }
+        });
+
+
+    }
+    var movieDatatable = null;
+    function GetMovies() {
+        var block = $("#tblMovies");
+
+        if (movieDatatable !== null && movieDatatable !== "") {
+            movieDatatable.fnDestroy();
+        }
+
+        var cols = [
+
+            {
+                "mDataProp": "Poster", "title": "Poster",
+                "mRender": function (data, types, full) {
+
+                    var html = '<img src="' + (data != null ? (rooturl + data) : "") + '" alt="No Image" height="75" width="125" />';
+                    return html;
+                }
+            },
+            {
+                "mDataProp": "Name", "title": "Title"
+            },
+            {
+                "mDataProp": "YearOfRelease", "title": "Year of release"
+            },
+            {
+                "mDataProp": "ProducerName", "title": "Producer",
+                "mRender": function (data, types, full) {
+
+                    var html = '<a title="Edit ' + data +'(Producer)" onclick="return EditUser(false,' + full.ProducerId + ')">' + data + '</a>';
+                    return html;
+                }
+            },
+
+            {
+                "mDataProp": "Actors", "title": "Actors",
+                "mRender": function (data, types, full) {
+
+                    var html = "<ul>";
+                    $.each(data, function (i, d) {
+                        html += '<li><a title="Edit '+d.Name+'(Actor)" onclick="return EditUser(true,' + d.ActorOrProducerId + ')">' + d.Name + '</a></li>';
+                    })
+                    html += "</ul>";
+                    return html;
+                }
+            },
+            {
+                "mDataProp": "MovieId", "title": "Actions",
+                "mRender": function (data, types, full) {
+                    var html = '<a title="Edit '+full.Name+'" onclick="return EditMovie(' + data + ')">Edit</a>';
+                    return html;
+                }
+            }
+        ];
+
+        var colsDef = [{
+            "aTargets": [2],
+            "bSortable": false
+        }];
+
+        var $urls = rooturl + "api/Movie/GetMovies";
+
+        movieDatatable = $("#tblStudent").dataTable({
+
+            dom: '<l<"toolbar">f>r<"datatable-scroll"t><"datatable-footer info-left"ip>',
+            "bProcessing": true,//for processing bar   (enable and disabled)
+            "bDestory": true,//An array or space-separated string naming the pieces of data to delete.
+            "destroy": true,
+            "bRetrieve": true,
+            "bSort": true,//for sorting (enable and disabled)
+            "bLengthChange": true,//Count head beside search box dropdown pages (enbled and disabled)
+            "bInfo": true, //Showing count (Footer down) of records (enable and disabled)
+            "bPaginate": true,//Page navigations enabled and disabled
+            "bServerSide": true,//Simply set it to true and DataTables will operate in server-side processing mode.
+            "bFilter": true,//Search Box (enable and disabled)
+            "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]], //Show pages list data in dropdown list
+            "language": {
+                "emptyTable": "No data available",
+                "search": " ",
+                "searchPlaceholder": "Search"
+            },
+            "bStateSave": true,
+            "bOrder": [2, 'desc'],
+            "sAjaxSource": $urls,
+            "fnServerData": function (sSource, aaData, fnCallback) {
+
+                CustomizedPagingFilterModel = {
+                    "PageLength": aaData.filter(a => a.name === "iDisplayLength")[0].value,
+                    "PageIndex": aaData.filter(a => a.name === "iDisplayStart")[0].value,
+                    "PageSortCol": aaData.filter(a => a.name === "iSortCol_0")[0].value,
+                    "PageSortDir": aaData.filter(a => a.name === "sSortDir_0")[0].value,
+                    "CustomSearch": aaData.filter(a => a.name === "sSearch")[0].value,
+                    "PageSortColName": aaData.filter(a => a.name === "mDataProp_" + aaData.filter(a => a.name === "iSortCol_0")[0].value)[0].value,
+
+                };
+                
+                $.ajax({
+                    url: rooturl + "api/Movie/GetMovies",
+                    type: "POST",
+                    'cache': false,
+                    dataType: 'json',
+                    data: JSON.stringify(CustomizedPagingFilterModel),
+                    headers: { 'Content-type': "application/json;charset=utf-8" },
+                    'dataSrc': "tableData",
+                    success: function (res) {
+                        console.log(res)
+                        fnCallback(res);
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.log(jqXHR)
+                    }
+                });
+            },
+            "fnRowCallback": function (nRow, aData, iDisplayIndex, iDisplayIndexFull) {
+
+            },
+            "aoColumns": cols,
+            "aoColumnDefs": colsDef
+        });
+
+
+
+    }
+
+
+    function EditMovie(Id) {
+        frmMovieValidations.resetForm();
+        $("input,select,textarea").removeClass("error");
+        $("#txtFile").val(null);
+        $.ajax({
+            type: "GET",
+            url: rooturl + "api/Movie/GetMovie?Id=" + Id,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+                var producer = [];
+                $("#txtTitle").val(data.Name);
+                $("#txtYear").val(data.YearOfRelease);
+                $("#txtPlot").val(data.Plot);
+                $("#hdnPoster").val(data.Poster);
+                $("#hdnMovieId").val(data.MovieId);                
+                $("#imgPoster").attr("src",(rooturl+data.Poster));
+                $("#selActors").val(data.Actors.map(a => a.ActorOrProducerId)).trigger('change');
+                producer.push(data.ProducerId);
+                $("#selProducer").val(producer).trigger('change');
+                $("#btnMovieSave").text("Update Movie");
+                $("#myModal").modal("show");
+
+            },
+            error: function (data, textStatus, jqXHR) {
+                alert("Something Wrong")
+            }
+        });
+    }
+
+    function EditUser(isActor, Id) {
+        frmUserValidations.resetForm();
+        $("input,select,textarea").removeClass("error")
+        $("#txtDOB").datepicker();
+        $("#lblEdit").text("Edit " + (isActor ? "Actor" : "Producer"));
+        $("#btnSaveUser").text(("Update " + (isActor ? "Actor" : "Producer")));
+        $("#ddlGender").val(-1);
+        $("#hdnUserId").val(Id)
+        $.ajax({
+            type: "GET",
+            url: rooturl + "api/Movie/GetUser?Id=" + Id,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+
+                if (data.DOB != null) {
+                    $('#txtDOB').datepicker("setDate", new Date(data.DOB))
+                } else {
+                    $('#txtDOB').datepicker("setDate", null);
+                }
+
+                $("#txtBio").val(data.BIO);
+                $("#txtName").val(data.Name);
+                $("#ddlGender").val(data.Sex);
+                $("#userModal").modal("show");
+
+            },
+            error: function (data, textStatus, jqXHR) {
+                alert("Something Wrong")
+            }
+        });
+    }
+
+    function SaveUser() {
+        var User = {
+            Name: $("#txtName").val(),
+            BIO: $("#txtBio").val(),
+            ActorOrProducerId: $("#hdnUserId").val(),
+            DOB: $("#txtDOB").val(),
+            Sex: $("#ddlGender").val(),
+        }
+        if ($("#frmUser").valid()) {
+            $.ajax({
+                type: "POST",
+                url: rooturl + "api/Movie/SaveUser",
+                type: "POST",
+                data: JSON.stringify(User),
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    alert("Updated successfully");
+                    $("#userModal").modal("hide");
+                    GetMovies();
+                },
+                error: function (data, textStatus, jqXHR) {
+                    alert("Something Wrong")
+                }
+            });
+        }
+    }
+</script>
