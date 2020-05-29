@@ -2,7 +2,7 @@
 --  ActorOrProducerId int primary key identity(1,1),
 --  Name nvarchar(50),
 --  Sex int FOREIGN KEY REFERENCES Gender(GenderId),
---  DOB int,
+--  DOB date,
 --  BIO nvarchar(max),
 --  IsActor bit
 --)
